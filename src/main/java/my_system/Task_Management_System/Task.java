@@ -1,4 +1,14 @@
 package my_system.Task_Management_System;
 
-public record Task() {
+import java.time.LocalDateTime;
+
+public record Task(
+        Long id,
+        Long creatorId,
+        Long assignedUserId,
+        TaskStatus status,
+        LocalDateTime createDateTime,
+        LocalDateTime deadlineDate,
+        TaskPriority priority
+) {
 }
