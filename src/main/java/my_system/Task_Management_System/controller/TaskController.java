@@ -1,7 +1,8 @@
-package my_system.Task_Management_System.controllers;
+package my_system.Task_Management_System.controller;
 
-import my_system.Task_Management_System.Task;
-import my_system.Task_Management_System.services.TaskService;
+import jakarta.persistence.EntityNotFoundException;
+import my_system.Task_Management_System.dto.Task;
+import my_system.Task_Management_System.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class TaskController {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(task);
-        } catch (NoSuchElementException e){
+        } catch (EntityNotFoundException e){
             log.error(e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -48,7 +49,7 @@ public class TaskController {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(allTasks);
-        } catch (NoSuchElementException e){
+        } catch (EntityNotFoundException e){
             log.error(e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -81,7 +82,6 @@ public class TaskController {
             @RequestBody Task taskToUpdate
     ){
         log.info("Called method updateTaskById: id = {}", id);
-
         try{
             Task updatedTask = taskService.updateTask(id, taskToUpdate);
             return ResponseEntity
@@ -101,7 +101,7 @@ public class TaskController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/cancel")
     public ResponseEntity<Void> deleteTask(
             @PathVariable("id") Long id
     ){
@@ -115,6 +115,23 @@ public class TaskController {
             log.error(e.getMessage());
             return ResponseEntity
                     .notFound()
+                    .build();
+        }
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<Task> inProgressTask(
+            @PathVariable("id") Long id
+    ){
+        log.info("Called method inProgressTask: id = {}", id);
+
+        try {
+            return ResponseEntity
+                    .ok(taskService.taskToStart(id));
+        } catch (IllegalArgumentException e){
+            log.error(e.getMessage());
+            return ResponseEntity
+                    .badRequest()
                     .build();
         }
     }
