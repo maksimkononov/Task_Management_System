@@ -29,4 +29,16 @@ public class TaskMapper {
                 task.priority()
         );
     }
+
+    public void updateEntityFromDomain(Task dto, TaskEntity entity){
+        if(dto.assignedUserId() != null){
+            entity.setAssignedUserId(dto.assignedUserId());
+        }
+        if(dto.deadlineDate() != null){
+            entity.setDeadlineDate(dto.deadlineDate());
+        }
+        if(dto.priority() != null){
+            entity.setPriority(dto.priority());
+        }
+    }
 }

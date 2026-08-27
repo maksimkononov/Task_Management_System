@@ -74,6 +74,7 @@ public class TaskService {
     // здесь нужно будет потом поменять логику, сейчас у меня один лишний запрос формируется
     // можно будет добавить @Transactional и убрать save()
     // можно еще добавить функцию обновления некоторых полей в mapper
+    @Transactional
     public Task updateTask(Long id, Task taskToUpdate) {
         TaskEntity oldTaskEntity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Not found task with id = " + id));
@@ -82,13 +83,16 @@ public class TaskService {
             throw new IllegalStateException("Task cannot update because status is DONE or IN_PROGRESS");
         }
 
-        TaskEntity taskEntityToSave = mapper.toEntity(taskToUpdate);
-        taskEntityToSave.setId(oldTaskEntity.getId());
-        taskEntityToSave.setStatus(TaskStatus.CREATED);
+//        TaskEntity taskEntityToSave = mapper.toEntity(taskToUpdate);
+//        taskEntityToSave.setId(oldTaskEntity.getId());
+//        taskEntityToSave.setStatus(TaskStatus.CREATED);
+//
+//        TaskEntity updatedTaskEntity = repository.save(taskEntityToSave);
+//
+//        return mapper.toDomain(updatedTaskEntity);
 
-        TaskEntity updatedTaskEntity = repository.save(taskEntityToSave);
-
-        return mapper.toDomain(updatedTaskEntity);
+        mapper.updateEntityFromDomain(taskToUpdate, oldTaskEntity);
+        return mapper.toDomain(oldTaskEntity);
     }
 
     @Transactional
