@@ -17,7 +17,7 @@ public class TaskEntity {
     @Column(name="creatorId", nullable = false)
     private Long creatorId;
 
-    @Column(name="assignedUserId", nullable = false)
+    @Column(name="assignedUserId")
     private Long assignedUserId;
 
     @Column(name="status", nullable = false)

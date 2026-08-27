@@ -26,42 +26,9 @@ public class TaskService {
     private final TaskRepository repository;
     private final TaskMapper mapper;
 
-    private AtomicLong idCounter;
-    private HashMap<Long, Task> map;
-
     public TaskService(TaskRepository repository, TaskMapper mapper){
         this.repository = repository;
         this.mapper = mapper;
-        idCounter = new AtomicLong(0);
-        map = new HashMap<>(Map.of(
-                idCounter.incrementAndGet(), new Task(
-                        idCounter.get(),
-                        1L,
-                        1L,
-                        TaskStatus.CREATED,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        TaskPriority.LOW
-                ),
-                idCounter.incrementAndGet(), new Task(
-                        idCounter.get(),
-                        2L,
-                        2L,
-                        TaskStatus.CREATED,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        TaskPriority.LOW
-                ),
-                idCounter.incrementAndGet(), new Task(
-                        idCounter.get(),
-                        3L,
-                        3L,
-                        TaskStatus.CREATED,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        TaskPriority.LOW
-                )
-        ));
     }
 
     public Task findTaskById(Long id) {
@@ -86,8 +53,6 @@ public class TaskService {
         return allTaskEntity.stream().map(mapper::toDomain).toList();
     }
 
-    // Добавить проверку или обработку ситуации, когда не все поля передаются по JSON
-    // например, если не передается assignedUserId и тд.
     public Task createTask(Task taskToCreate) {
         if(taskToCreate.id() != null){
             throw new IllegalArgumentException("Id should be null");
