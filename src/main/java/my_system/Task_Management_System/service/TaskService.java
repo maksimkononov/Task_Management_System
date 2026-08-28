@@ -3,21 +3,16 @@ package my_system.Task_Management_System.service;
 import jakarta.persistence.EntityNotFoundException;
 import my_system.Task_Management_System.Entity.TaskEntity;
 import my_system.Task_Management_System.dto.Task;
-import my_system.Task_Management_System.TaskPriority;
-import my_system.Task_Management_System.TaskStatus;
+import my_system.Task_Management_System.dto.TaskStatus;
 import my_system.Task_Management_System.mapper.TaskMapper;
 import my_system.Task_Management_System.repository.TaskRepository;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class TaskService {
@@ -53,6 +48,7 @@ public class TaskService {
         return allTaskEntity.stream().map(mapper::toDomain).toList();
     }
 
+
     public Task createTask(Task taskToCreate) {
         if(taskToCreate.id() != null){
             throw new IllegalArgumentException("Id should be null");
@@ -71,9 +67,7 @@ public class TaskService {
         return mapper.toDomain(savedTask);
     }
 
-    // здесь нужно будет потом поменять логику, сейчас у меня один лишний запрос формируется
-    // можно будет добавить @Transactional и убрать save()
-    // можно еще добавить функцию обновления некоторых полей в mapper
+
     @Transactional
     public Task updateTask(Long id, Task taskToUpdate) {
         TaskEntity oldTaskEntity = repository.findById(id)
@@ -83,17 +77,10 @@ public class TaskService {
             throw new IllegalStateException("Task cannot update because status is DONE or IN_PROGRESS");
         }
 
-//        TaskEntity taskEntityToSave = mapper.toEntity(taskToUpdate);
-//        taskEntityToSave.setId(oldTaskEntity.getId());
-//        taskEntityToSave.setStatus(TaskStatus.CREATED);
-//
-//        TaskEntity updatedTaskEntity = repository.save(taskEntityToSave);
-//
-//        return mapper.toDomain(updatedTaskEntity);
-
         mapper.updateEntityFromDomain(taskToUpdate, oldTaskEntity);
         return mapper.toDomain(oldTaskEntity);
     }
+
 
     @Transactional
     public void cancelTask(Long id) {
@@ -111,8 +98,9 @@ public class TaskService {
 
         repository.setStatus(id, TaskStatus.CANCEL);
 
-        log.info("Successfully cancelled task: id = " + id);
+        log.info("Successfully cancelled task: id = {}", id);
     }
+
 
     @Transactional
     public Task taskToStart(Long id) {
@@ -139,6 +127,37 @@ public class TaskService {
 
         return mapper.toDomain(taskEntity);
     }
+
+
+    @Transactional
+    public Task completeTask(Long id) {
+        TaskEntity taskEntity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Not found task with id = " + id));
+
+        if(taskEntity.getAssignedUserId() == null){
+            throw  new IllegalArgumentException("AssignedUserId cannot be null");
+        }
+
+        if(taskEntity.getStatus().equals(TaskStatus.DONE)){
+            throw new IllegalStateException("The task has already been done");
+        }
+
+        if(!taskEntity.getStatus().equals(TaskStatus.IN_PROGRESS)){
+            throw new IllegalStateException("Status should be IN_PROGRESS");
+        }
+
+        if(taskEntity.getDeadlineDate() == null){
+            throw new IllegalArgumentException("DeadlineDate cannot be null");
+        }
+
+        taskEntity.setDoneDateTime(LocalDateTime.now());
+        taskEntity.setStatus(TaskStatus.DONE);
+
+        return mapper.toDomain(taskEntity);
+    }
+
+
+
 
     private boolean isConflictToStartTask(Long assignedUserId){
         return repository.conflictCountHandleTasks(assignedUserId, TaskStatus.IN_PROGRESS) >= 5;

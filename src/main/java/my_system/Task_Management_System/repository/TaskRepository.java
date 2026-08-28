@@ -1,7 +1,7 @@
 package my_system.Task_Management_System.repository;
 
 import my_system.Task_Management_System.Entity.TaskEntity;
-import my_system.Task_Management_System.TaskStatus;
+import my_system.Task_Management_System.dto.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -1,6 +1,7 @@
 package my_system.Task_Management_System.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import my_system.Task_Management_System.dto.Task;
 import my_system.Task_Management_System.service.TaskService;
 import org.slf4j.Logger;
@@ -28,77 +29,41 @@ public class TaskController {
     ){
         log.info("Called method getTaskById: id = {}", id);
 
-        try{
-            Task task = taskService.findTaskById(id);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(task);
-        } catch (EntityNotFoundException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(taskService.findTaskById(id));
     }
 
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks(){
         log.info("Called method getAllTasks");
-        try{
-            List<Task> allTasks = taskService.findAllTasks();
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(allTasks);
-        } catch (EntityNotFoundException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(taskService.findAllTasks());
     }
 
     @PostMapping
     public ResponseEntity<Task> createTask(
-            @RequestBody Task taskToCreate
+            @RequestBody @Valid Task taskToCreate
     ){
         log.info("Called method createTask: task = {}", taskToCreate);
 
-        try{
-            Task newTask = taskService.createTask(taskToCreate);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(newTask);
-        } catch (IllegalArgumentException | IllegalStateException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
-        }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(taskService.createTask(taskToCreate));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(
             @PathVariable("id") Long id,
-            @RequestBody Task taskToUpdate
+            @RequestBody @Valid Task taskToUpdate
     ){
         log.info("Called method updateTaskById: id = {}", id);
-        try{
-            Task updatedTask = taskService.updateTask(id, taskToUpdate);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(updatedTask);
-        } catch(IllegalStateException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
-        }
-        catch (NoSuchElementException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(taskService.updateTask(id, taskToUpdate));
     }
 
     @DeleteMapping("/{id}/cancel")
@@ -106,17 +71,11 @@ public class TaskController {
             @PathVariable("id") Long id
     ){
         log.info("Called method deleteTaskById: id = {}", id);
-        try{
-            taskService.cancelTask(id);
-            return ResponseEntity
-                    .ok()
-                    .build();
-        } catch(NoSuchElementException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .notFound()
-                    .build();
-        }
+
+        taskService.cancelTask(id);
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
     @PostMapping("/{id}/start")
@@ -125,14 +84,17 @@ public class TaskController {
     ){
         log.info("Called method inProgressTask: id = {}", id);
 
-        try {
-            return ResponseEntity
-                    .ok(taskService.taskToStart(id));
-        } catch (IllegalArgumentException e){
-            log.error(e.getMessage());
-            return ResponseEntity
-                    .badRequest()
-                    .build();
-        }
+        return ResponseEntity
+                .ok(taskService.taskToStart(id));
+    }
+
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<Task> completeTask(
+            @PathVariable("id") Long id
+    ){
+        log.info("Called method completeTask: id = {}", id);
+
+        return ResponseEntity
+                .ok(taskService.completeTask(id));
     }
 }

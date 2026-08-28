@@ -1,8 +1,8 @@
 package my_system.Task_Management_System.Entity;
 
 import jakarta.persistence.*;
-import my_system.Task_Management_System.TaskPriority;
-import my_system.Task_Management_System.TaskStatus;
+import my_system.Task_Management_System.dto.TaskPriority;
+import my_system.Task_Management_System.dto.TaskStatus;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +34,9 @@ public class TaskEntity {
     @Enumerated(EnumType.STRING)
     private TaskPriority priority;
 
+    @Column(name="doneDateTime")
+    private LocalDateTime doneDateTime;
+
     public TaskEntity() {
     }
 
@@ -44,7 +47,8 @@ public class TaskEntity {
             TaskStatus status,
             LocalDateTime createDateTime,
             LocalDateTime deadlineDate,
-            TaskPriority priority
+            TaskPriority priority,
+            LocalDateTime doneDateTime
     ) {
         this.id = id;
         this.creatorId = creatorId;
@@ -53,6 +57,7 @@ public class TaskEntity {
         this.createDateTime = createDateTime;
         this.deadlineDate = deadlineDate;
         this.priority = priority;
+        this.doneDateTime = doneDateTime;
     }
 
     public Long getId() {
@@ -111,11 +116,22 @@ public class TaskEntity {
         this.priority = priority;
     }
 
+    public LocalDateTime getDoneDateTime() {
+        return doneDateTime;
+    }
+
+    public void setDoneDateTime(LocalDateTime doneDateTime) {
+        this.doneDateTime = doneDateTime;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "{id = %d, creatorId = %d, assignedUserId = %d, status = %s, createDateTime = %s, deadlineDate = %s, priority = %s}",
-                id, creatorId, assignedUserId, status, createDateTime, deadlineDate, priority
+                "{id = %d, creatorId = %d, assignedUserId = %d, " +
+                "status = %s, createDateTime = %s, deadlineDate = %s, " +
+                "priority = %s, doneDateTime = %s}",
+                id, creatorId, assignedUserId, status,
+                createDateTime, deadlineDate, priority, doneDateTime
         );
     }
 }
