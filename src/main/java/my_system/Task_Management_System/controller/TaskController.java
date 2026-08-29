@@ -3,7 +3,10 @@ package my_system.Task_Management_System.controller;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import my_system.Task_Management_System.dto.Task;
+import my_system.Task_Management_System.dto.TaskPriority;
+import my_system.Task_Management_System.dto.TaskStatus;
 import my_system.Task_Management_System.service.TaskService;
+import my_system.Task_Management_System.web.TaskSearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,12 +38,28 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(){
+    public ResponseEntity<List<Task>> getAllTasks(
+            @RequestParam(name = "creatorId", required = false) Long creatorId,
+            @RequestParam(name = "assignedUserId", required = false) Long assignedUserId,
+            @RequestParam(name = "status", required = false) TaskStatus status,
+            @RequestParam(name = "priority", required = false) TaskPriority priority,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "pageNumber", required = false) Integer pageNumber
+    ){
         log.info("Called method getAllTasks");
+
+        TaskSearchFilter filter = new TaskSearchFilter(
+                creatorId,
+                assignedUserId,
+                status,
+                priority,
+                pageSize,
+                pageNumber
+        );
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(taskService.findAllTasks());
+                .body(taskService.findAllTasksByFilter(filter));
     }
 
     @PostMapping

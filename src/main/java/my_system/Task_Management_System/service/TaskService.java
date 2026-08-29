@@ -6,8 +6,10 @@ import my_system.Task_Management_System.dto.Task;
 import my_system.Task_Management_System.dto.TaskStatus;
 import my_system.Task_Management_System.mapper.TaskMapper;
 import my_system.Task_Management_System.repository.TaskRepository;
+import my_system.Task_Management_System.web.TaskSearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,10 +38,25 @@ public class TaskService {
     }
 
 
-    public List<Task> findAllTasks() {
+    public List<Task> findAllTasksByFilter(TaskSearchFilter filter) {
         log.info("Called method findAllTasks");
 
-        List<TaskEntity> allTaskEntity = repository.findAll();
+        int pageSize = filter.pageSize() != null
+                ? filter.pageSize() : 10;
+
+        int pageNumber = filter.pageNumber() != null
+                ? filter.pageNumber() : 0;
+
+        Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
+
+//        List<TaskEntity> allTaskEntity = repository.findAll();
+        List<TaskEntity> allTaskEntity = repository.findAllByFilter(
+                filter.creatorId(),
+                filter.assignedUserId(),
+                filter.status(),
+                filter.priority(),
+                pageable
+        );
 
         if(allTaskEntity.isEmpty()){
             throw new EntityNotFoundException("No tasks were found");
@@ -50,10 +67,6 @@ public class TaskService {
 
 
     public Task createTask(Task taskToCreate) {
-        if(taskToCreate.id() != null){
-            throw new IllegalArgumentException("Id should be null");
-        }
-
         if(taskToCreate.status() != null){
             throw new IllegalStateException("Status should be null");
         }
